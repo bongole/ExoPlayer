@@ -135,7 +135,7 @@ public class MediaCodecUtil {
     for (int i = 0; i < numberOfCodecs; i++) {
       MediaCodecInfo info = mediaCodecList.getCodecInfoAt(i);
       String codecName = info.getName();
-      if (!info.isEncoder() && codecName.startsWith("OMX.")
+      if (!info.isEncoder() && codecName.startsWith("OMX.google.")
           && (secureDecodersExplicit || !codecName.endsWith(".secure"))) {
         String[] supportedTypes = info.getSupportedTypes();
         for (int j = 0; j < supportedTypes.length; j++) {

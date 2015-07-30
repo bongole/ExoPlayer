@@ -175,28 +175,7 @@ public class MediaCodecUtil {
         return true;
     }
 
-    if (info.isEncoder() || !name.startsWith("OMX.")
-        || (!secureDecodersExplicit && name.endsWith(".secure"))) {
-      return false;
-    }
-
-    // Work around an issue where creating a particular MP3 decoder on some devices on platform API
-    // version 16 crashes mediaserver.
-    if (Util.SDK_INT == 16
-        && ("dlxu".equals(Util.DEVICE) // HTC Butterfly
-            || "protou".equals(Util.DEVICE) // HTC Desire X
-            || "C6602".equals(Util.DEVICE) || "C6603".equals(Util.DEVICE)) // Sony Xperia Z
-        && name.equals("OMX.qcom.audio.decoder.mp3")) {
-      return false;
-    }
-
-    // Work around an issue where the VP8 decoder on Samsung Galaxy S4 Mini does not render video.
-    if (Util.SDK_INT <= 19 && Util.DEVICE != null && Util.DEVICE.startsWith("serrano")
-        && "samsung".equals(Util.MANUFACTURER) && name.equals("OMX.SEC.vp8.dec")) {
-      return false;
-    }
-
-    return true;
+    return false;
   }
 
   private static boolean isAdaptive(CodecCapabilities capabilities) {

@@ -1,6 +1,21 @@
 # Release notes #
 
-### r.1.5.0 ###
+### r1.5.2 ###
+
+* MPEG-TS/HLS: Fix frame drops playing H265 video.
+* SmoothStreaming: Fix parsing of ProtectionHeader.
+
+### r1.5.1 ###
+
+* Enable smooth frame release by default.
+* Added OkHttpDataSource extension.
+* AndroidTV: Correctly detect 4K display size on Bravia devices.
+* FMP4: Handle non-sample data in mdat boxes.
+* TTML: Fix parsing of some colors on Jellybean.
+* SmoothStreaming: Ignore tfdt boxes.
+* Misc bug fixes.
+
+### r1.5.0 ###
 
 * Multi-track support.
 * DASH: Limited support for multi-period manifests.

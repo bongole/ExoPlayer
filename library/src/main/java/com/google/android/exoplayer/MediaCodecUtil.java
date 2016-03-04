@@ -187,9 +187,6 @@ public final class MediaCodecUtil {
       }
 
       return false;
-    }
-
-    return false;
   }
 
   private static boolean isAdaptive(CodecCapabilities capabilities) {

@@ -195,8 +195,22 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback, 
   }
 
   @Override
+  public void onStart() {
+    super.onStart();
+    if (Util.SDK_INT > 23) {
+      onShown();
+    }
+  }
+
+  @Override
   public void onResume() {
     super.onResume();
+    if (Util.SDK_INT <= 23 || player == null) {
+      onShown();
+    }
+  }
+
+  private void onShown() {
     Intent intent = getIntent();
     contentUri = intent.getData();
     contentType = intent.getIntExtra(CONTENT_TYPE_EXTRA,
@@ -216,6 +230,20 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback, 
   @Override
   public void onPause() {
     super.onPause();
+    if (Util.SDK_INT <= 23) {
+      onHidden();
+    }
+  }
+
+  @Override
+  public void onStop() {
+    super.onStop();
+    if (Util.SDK_INT > 23) {
+      onHidden();
+    }
+  }
+
+  private void onHidden() {
     if (!enableBackgroundAudio) {
       releasePlayer();
     } else {
@@ -704,13 +732,15 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback, 
     @Override
     public boolean dispatchKeyEvent(KeyEvent event) {
       int keyCode = event.getKeyCode();
-      if (playerControl.canSeekForward() && keyCode == KeyEvent.KEYCODE_MEDIA_FAST_FORWARD) {
+      if (playerControl.canSeekForward() && (keyCode == KeyEvent.KEYCODE_MEDIA_FAST_FORWARD
+          || keyCode == KeyEvent.KEYCODE_DPAD_RIGHT)) {
         if (event.getAction() == KeyEvent.ACTION_DOWN) {
           playerControl.seekTo(playerControl.getCurrentPosition() + 15000); // milliseconds
           show();
         }
         return true;
-      } else if (playerControl.canSeekBackward() && keyCode == KeyEvent.KEYCODE_MEDIA_REWIND) {
+      } else if (playerControl.canSeekBackward() && (keyCode == KeyEvent.KEYCODE_MEDIA_REWIND
+          || keyCode == KeyEvent.KEYCODE_DPAD_LEFT)) {
         if (event.getAction() == KeyEvent.ACTION_DOWN) {
           playerControl.seekTo(playerControl.getCurrentPosition() - 5000); // milliseconds
           show();

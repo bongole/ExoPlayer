@@ -29,7 +29,9 @@ import android.util.Log;
 import android.util.Pair;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 
 /**
  * A utility class for querying the available codecs.
@@ -176,62 +178,90 @@ public final class MediaCodecUtil {
     return null;
   }
 
+  private static final List<String> swCodecBlackList = Arrays.asList(
+          "C11",
+          "F01F",
+          "F03F",
+          "FJL22_jp_kdi",
+          "SBM301F",
+          "SBM302SH",
+          "SBM303SH",
+          "SH-01FDQ",
+          "SH-02F",
+          "SH-05F",
+          "SHL23",
+          "SHL24",
+          "SHT22",
+          "SOL23",
+          "g2",
+          "zee"
+  );
+
   /**
    * Returns whether the specified codec is usable for decoding on the current device.
    */
   private static boolean isCodecUsableDecoder(MediaCodecInfo info, String name,
       boolean secureDecodersExplicit) {
-    if (info.isEncoder() || (!secureDecodersExplicit && name.endsWith(".secure"))) {
-      return false;
-    }
+    if( Util.SDK_INT == 17 && swCodecBlackList.contains(Util.DEVICE) ) {
+      if (info.isEncoder() || (!secureDecodersExplicit && name.endsWith(".secure"))) {
+        return false;
+      }
 
-    // Work around broken audio decoders.
-    if (Util.SDK_INT < 21
-        && ("CIPAACDecoder".equals(name))
-            || "CIPMP3Decoder".equals(name)
-            || "CIPVorbisDecoder".equals(name)
-            || "AACDecoder".equals(name)
-            || "MP3Decoder".equals(name)) {
-      return false;
-    }
-    if (Util.SDK_INT == 16 && "OMX.SEC.MP3.Decoder".equals(name)) {
-      return false;
-    }
+      // Work around broken audio decoders.
+      if (Util.SDK_INT < 21
+              && ("CIPAACDecoder".equals(name))
+              || "CIPMP3Decoder".equals(name)
+              || "CIPVorbisDecoder".equals(name)
+              || "AACDecoder".equals(name)
+              || "MP3Decoder".equals(name)) {
+        return false;
+      }
+      if (Util.SDK_INT == 16 && "OMX.SEC.MP3.Decoder".equals(name)) {
+        return false;
+      }
 
-    // Work around an issue where creating a particular MP3 decoder on some devices on platform API
-    // version 16 crashes mediaserver.
-    if (Util.SDK_INT == 16
-        && "OMX.qcom.audio.decoder.mp3".equals(name)
-        && ("dlxu".equals(Util.DEVICE) // HTC Butterfly
-            || "protou".equals(Util.DEVICE) // HTC Desire X
-            || "C6602".equals(Util.DEVICE) // Sony Xperia Z
-            || "C6603".equals(Util.DEVICE)
-            || "C6606".equals(Util.DEVICE)
-            || "C6616".equals(Util.DEVICE)
-            || "L36h".equals(Util.DEVICE)
-            || "SO-02E".equals(Util.DEVICE))) {
+      // Work around an issue where creating a particular MP3 decoder on some devices on platform API
+      // version 16 crashes mediaserver.
+      if (Util.SDK_INT == 16
+              && "OMX.qcom.audio.decoder.mp3".equals(name)
+              && ("dlxu".equals(Util.DEVICE) // HTC Butterfly
+              || "protou".equals(Util.DEVICE) // HTC Desire X
+              || "C6602".equals(Util.DEVICE) // Sony Xperia Z
+              || "C6603".equals(Util.DEVICE)
+              || "C6606".equals(Util.DEVICE)
+              || "C6616".equals(Util.DEVICE)
+              || "L36h".equals(Util.DEVICE)
+              || "SO-02E".equals(Util.DEVICE))) {
+        return false;
+      }
+
+      // Work around an issue where large timestamps are not propagated correctly.
+      if (Util.SDK_INT == 16
+              && "OMX.qcom.audio.decoder.aac".equals(name)
+              && ("C1504".equals(Util.DEVICE) // Sony Xperia E
+              || "C1505".equals(Util.DEVICE)
+              || "C1604".equals(Util.DEVICE) // Sony Xperia E dual
+              || "C1605".equals(Util.DEVICE))) {
+        return false;
+      }
+
+      // Work around an issue where the VP8 decoder on Samsung Galaxy S3/S4 Mini does not render
+      // video.
+      if (Util.SDK_INT <= 19 && Util.DEVICE != null
+              && (Util.DEVICE.startsWith("d2") || Util.DEVICE.startsWith("serrano"))
+              && "samsung".equals(Util.MANUFACTURER) && name.equals("OMX.SEC.vp8.dec")) {
+        return false;
+      }
+
+      return true;
+    } else {
+      if( !info.isEncoder() && name.startsWith("OMX.google.")
+              && (secureDecodersExplicit || !name.endsWith(".secure"))) {
+        return true;
+      }
+
       return false;
     }
-
-    // Work around an issue where large timestamps are not propagated correctly.
-    if (Util.SDK_INT == 16
-        && "OMX.qcom.audio.decoder.aac".equals(name)
-        && ("C1504".equals(Util.DEVICE) // Sony Xperia E
-            || "C1505".equals(Util.DEVICE)
-            || "C1604".equals(Util.DEVICE) // Sony Xperia E dual
-            || "C1605".equals(Util.DEVICE))) {
-      return false;
-    }
-
-    // Work around an issue where the VP8 decoder on Samsung Galaxy S3/S4 Mini does not render
-    // video.
-    if (Util.SDK_INT <= 19 && Util.DEVICE != null
-        && (Util.DEVICE.startsWith("d2") || Util.DEVICE.startsWith("serrano"))
-        && "samsung".equals(Util.MANUFACTURER) && name.equals("OMX.SEC.vp8.dec")) {
-      return false;
-    }
-
-    return true;
   }
 
   private static boolean isAdaptive(CodecCapabilities capabilities) {

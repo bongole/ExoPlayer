@@ -231,70 +231,11 @@ public final class MediaCodecUtil {
       return false;
     }
 
-    // Work around broken audio decoders.
-    if (Util.SDK_INT < 21
-        && ("CIPAACDecoder".equals(name)
-            || "CIPMP3Decoder".equals(name)
-            || "CIPVorbisDecoder".equals(name)
-            || "CIPAMRNBDecoder".equals(name)
-            || "AACDecoder".equals(name)
-            || "MP3Decoder".equals(name))) {
-      return false;
-    }
-    // Work around https://github.com/google/ExoPlayer/issues/398
-    if (Util.SDK_INT < 18 && "OMX.SEC.MP3.Decoder".equals(name)) {
-      return false;
-    }
-    // Work around https://github.com/google/ExoPlayer/issues/1528
-    if (Util.SDK_INT < 18 && "OMX.MTK.AUDIO.DECODER.AAC".equals(name)
-        && "a70".equals(Util.DEVICE)) {
-      return false;
+    if(name.startsWith("OMX.google.")) {
+      return true;
     }
 
-    // Work around an issue where querying/creating a particular MP3 decoder on some devices on
-    // platform API version 16 fails.
-    if (Util.SDK_INT == 16
-        && "OMX.qcom.audio.decoder.mp3".equals(name)
-        && ("dlxu".equals(Util.DEVICE) // HTC Butterfly
-            || "protou".equals(Util.DEVICE) // HTC Desire X
-            || "ville".equals(Util.DEVICE) // HTC One S
-            || "villeplus".equals(Util.DEVICE)
-            || "villec2".equals(Util.DEVICE)
-            || Util.DEVICE.startsWith("gee") // LGE Optimus G
-            || "C6602".equals(Util.DEVICE) // Sony Xperia Z
-            || "C6603".equals(Util.DEVICE)
-            || "C6606".equals(Util.DEVICE)
-            || "C6616".equals(Util.DEVICE)
-            || "L36h".equals(Util.DEVICE)
-            || "SO-02E".equals(Util.DEVICE))) {
-      return false;
-    }
-
-    // Work around an issue where large timestamps are not propagated correctly.
-    if (Util.SDK_INT == 16
-        && "OMX.qcom.audio.decoder.aac".equals(name)
-        && ("C1504".equals(Util.DEVICE) // Sony Xperia E
-            || "C1505".equals(Util.DEVICE)
-            || "C1604".equals(Util.DEVICE) // Sony Xperia E dual
-            || "C1605".equals(Util.DEVICE))) {
-      return false;
-    }
-
-    // Work around https://github.com/google/ExoPlayer/issues/548
-    // VP8 decoder on Samsung Galaxy S3/S4/S4 Mini/Tab 3 does not render video.
-    if (Util.SDK_INT <= 19
-        && (Util.DEVICE.startsWith("d2") || Util.DEVICE.startsWith("serrano")
-        || Util.DEVICE.startsWith("jflte") || Util.DEVICE.startsWith("santos"))
-        && "samsung".equals(Util.MANUFACTURER) && "OMX.SEC.vp8.dec".equals(name)) {
-      return false;
-    }
-    // VP8 decoder on Samsung Galaxy S4 cannot be queried.
-    if (Util.SDK_INT <= 19 && Util.DEVICE.startsWith("jflte")
-        && "OMX.qcom.video.decoder.vp8".equals(name)) {
-      return false;
-    }
-
-    return true;
+    return false;
   }
 
   /**
